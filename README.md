@@ -4,7 +4,7 @@
 **Modified by Vision Force in 2026** for Rocket Racing Reborn project, which is a preservation project for
 Fortnite 30.40 its Rocket Racing (internally DelMar) mode
 
-Erbium is GPL-3.0. So is this as well.the licence text is
+Erbium is GPL-3.0. So is this as well. The licence text is
 unchanged in `LICENSE`, and this notice records the modification as GPL-3.0 section 5(a) requires
 
 <img src="https://raw.githubusercontent.com/Vision-Force/.github/main/profile/assets/divider-wide.svg" width="100%" alt="Vision Force Studio" />
@@ -54,7 +54,7 @@ README asks
 
 <a href="https://github.com/plooshi"><img src="https://raw.githubusercontent.com/Vision-Force/Erbium-for-RRR/main/assets/contributors/plooshi.svg" width="420" alt="plooshi" /></a>
 
-Erbium is plooshi's. 905 of the 942 commits under this project are hers, and everything Rocket Racing Reborn
+Erbium is plooshi's. 905 commits under this project are hers - all but a handful - and everything Rocket Racing Reborn
 does is made on top of that. The rest of the people whose commits are in this history:
 
 <p>
