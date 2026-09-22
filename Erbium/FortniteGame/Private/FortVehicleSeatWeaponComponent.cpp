@@ -9,6 +9,9 @@ void UFortVehicleSeatWeaponComponent::EquipVehicleWeapon(UFortVehicleSeatWeaponC
 
     auto PlayerController = (AFortPlayerControllerAthena*)FortPawn->Controller;
 
+    if (!PlayerController || !PlayerController->WorldInventory || !PlayerController->MyFortPawn)
+        return;
+
     auto VehicleWeapon = WeaponSeatDefinition->HasVehicleWeaponOverride() && WeaponSeatDefinition->VehicleWeaponOverride ? WeaponSeatDefinition->VehicleWeaponOverride : WeaponSeatDefinition->VehicleWeapon;
 
     auto VehicleItem = PlayerController->WorldInventory->GiveItem(VehicleWeapon, 1, AFortInventory::GetStats(VehicleWeapon)->ClipSize);

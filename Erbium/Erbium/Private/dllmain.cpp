@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "../../Engine/Public/NetDriver.h"
 #include "../../Erbium/Plugins/CrashReporter/Public/CrashReporter.h"
+#include "../../FortniteGame/Public/DelMar.h"
 #include "../../FortniteGame/Public/FortInventory.h"
 #include "../../FortniteGame/Public/FortPlayerControllerAthena.h"
 #include "../Public/Configuration.h"
@@ -20,12 +21,41 @@
 
 void Main()
 {
-    if constexpr (!FConfiguration::bGUI)
-        AllocConsole();
+    DelMar::InitLog();
 
-    if constexpr (!FConfiguration::bGUI || !FConfiguration::bUseStdoutLog)
     {
-        if (!FConfiguration::bGUI || GetConsoleWindow())
+        char Exe[MAX_PATH] = {};
+        GetModuleFileNameA(nullptr, Exe, MAX_PATH);
+        DelMar::Log("attached to %s (pid %lu)", Exe, GetCurrentProcessId());
+    }
+
+    if (!DelMar::WaitForLobbySignal(FConfiguration::DelMarLobbySignalWaitMs))
+    {
+        DelMar::Log("!! no lobby signal - aborting the bring-up, the client is left untouched");
+        return;
+    }
+
+    if constexpr (!FConfiguration::bGUI)
+    {
+        if constexpr (FConfiguration::bStdoutToFile)
+        {
+            FILE* s;
+            freopen_s(&s, DelMar::StdoutLogPath(), "w", stdout);
+            freopen_s(&s, DelMar::StdoutLogPath(), "w+", stderr);
+            setvbuf(stdout, nullptr, _IONBF, 0);
+        }
+        else
+        {
+            AllocConsole();
+            FILE* s;
+            freopen_s(&s, "CONOUT$", "w", stdout);
+            freopen_s(&s, "CONOUT$", "w+", stderr);
+            freopen_s(&s, "CONIN$", "r", stdin);
+        }
+    }
+    else if constexpr (!FConfiguration::bUseStdoutLog)
+    {
+        if (GetConsoleWindow())
         {
             FILE* s;
             freopen_s(&s, "CONOUT$", "w", stdout);
@@ -39,6 +69,11 @@ void Main()
 
     printf("Initializing SDK...\n");
     SDK::Init();
+    DelMar::Log("SDK::Init done: FN %.2f, UE %.1f", VersionInfo.FortniteVersion, VersionInfo.EngineVersion);
+
+    DelMar::HookTravel();
+
+    DelMar::HookInputMarshal();
 
     if constexpr (FConfiguration::bGUI)
     {
@@ -54,6 +89,23 @@ void Main()
 
     if (wcscmp(FConfiguration::Playlist, L"/DurianPlaylist/Playlist/Playlist_Durian.Playlist_Durian") == 0)
         FConfiguration::bEnableIris = false;
+
+    if (!DelMar::WaitForFrontend(FConfiguration::DelMarFrontendWaitMs))
+    {
+        DelMar::Log("!! the frontend lobby never appeared - aborting the bring-up, the client is left untouched");
+        return;
+    }
+
+    if (!DelMar::Preflight())
+    {
+        DelMar::Log("!! preflight failed - aborting the bring-up, the client is left untouched");
+        return;
+    }
+
+    if (DelMar::IsEnabled() && FConfiguration::bDelMarEnableNetPrediction)
+        DelMar::EnableNetPrediction();
+    if (DelMar::IsEnabled() && FConfiguration::bDelMarEnableRollbackInputs)
+        DelMar::EnableRollbackInputs();
 
     if (VersionInfo.EngineVersion >= 5.0)
     {
@@ -83,16 +135,7 @@ void Main()
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"log LogIris None"), nullptr);
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"log LogIrisRpc None"), nullptr);
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"log LogIrisBridge None"), nullptr);
-        /*auto IrisBool = Memcury::Scanner::FindPattern("83 3D ? ? ? ? ? 0F 8E ? ? ? ? 49 8B B9").RelativeOffset(2, 1).Get();
-        if (IrisBool)
-            *(uint32_t*)IrisBool = true;
-        else
-        {
-            IrisBool = Memcury::Scanner::FindPattern("44 39 25 ? ? ? ? 0F 9F C0 45 84 FF").RelativeOffset(3).Get();
 
-            if (IrisBool)
-                *(uint32_t*)IrisBool = true;
-        }*/
         auto IrisBool = FindCVar<uint32_t>(L"net.Iris.UseIrisReplication");
 
         if (IrisBool)
@@ -114,21 +157,12 @@ void Main()
                 }
             }
         }
-        // UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"net.Iris.UseIrisReplication 1"), nullptr);
     }
     if (VersionInfo.EngineVersion >= 5.4)
     {
         // sprint fix
-        auto SprintCVar = FindCVar<uint32_t>(L"Fort.MME.TacticalSprint");
-        auto HurdleCVar = FindCVar<uint32_t>(L"Fort.MME.Hurdle");
         auto SlideCVar = FindCVar<uint32_t>(L"Fort.MME.Sliding");
         auto MantleCVar = FindCVar<uint32_t>(L"Fort.MME.Clambering");
-
-        // if (SprintCVar)
-        //     *SprintCVar = false;
-
-        // if (HurdleCVar)
-        //     *HurdleCVar = false;
 
         if (SlideCVar)
             *SlideCVar = false;
@@ -136,11 +170,24 @@ void Main()
         if (MantleCVar)
             *MantleCVar = false;
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.TacticalSprint 0"), nullptr);
-        // UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.Hurdle 0"), nullptr);
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.Sliding 0"), nullptr);
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.Clambering 0"), nullptr);
     }
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"log LogSpecialEventScript VeryVerbose"), nullptr);
+
+    if (DelMar::IsEnabled())
+    {
+        for (auto Cmd : { L"log LogGameFeatures Verbose", L"log LogLevelStreaming Log", L"log LogWorldPartition Log", L"log LogNet Log", L"log LogGameMode Verbose",
+                          L"log LogPlayspaces VeryVerbose", L"log LogDelMarPlayspace VeryVerbose", L"log LogDelMarLevelManager VeryVerbose", L"log LogDelMarStateMachine VeryVerbose",
+                          L"log LogFortHermesLoadContext VeryVerbose", L"log LogDelMar VeryVerbose", L"log LogDelMarCore VeryVerbose", L"log LogDelMarCheat Verbose", L"log LogDelMarRaceManager Verbose", L"log LogDelMarTrackManager Verbose",
+                          L"log LogDelMarRespawnManager Verbose", L"log LogDelMarCheckpointManager Verbose", L"log LogDelMarVehicle Verbose", L"log LogDelMarGameMode Verbose", L"log LogDelMarPostRace Verbose",
+                          L"log LogDelMarVehicleInput Verbose", L"log LogDelMarNetworkInput Verbose", L"log LogDelMarVehiclePhysics Verbose",
+                          L"log LogDelMarVehicleNetworkPhysics Verbose", L"log LogDelMarVehicleAbility Verbose", L"log LogDelMarCamera Verbose",
+                          L"log LogDelMarNetPredictionMutator Verbose", L"log LogDelMarVehicleCollision Verbose",
+                          L"log LogPlayspacePlayerSpawningController Verbose", L"log LogPlayspacePlayerSpawningManager Verbose", L"log LogPlayspaceComponent_PlayerManager Verbose",
+                          L"log LogGameplayEventRouter Verbose", L"log LogAssetManager Verbose", L"log LogFortPlaylist Verbose" })
+            UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(Cmd), nullptr);
+    }
 
 #ifdef CLIENT
     Misc::InitClient();
@@ -157,12 +204,10 @@ void Main()
               VersionInfo.FortniteVersion, VersionInfo.EngineVersion);
     SetConsoleTitleA(GUI::windowTitle);
 
-    // if constexpr (!FConfiguration::bGUI)
-    //     Sleep(2000);
-
     printf("Hooking & finding offsets... (this may take a while)\n");
 
     FindNullsAndRetTrues();
+    DelMar::Log("patching %d null-funcs and %d ret-true funcs", (int)NullFuncs.size(), (int)RetTrueFuncs.size());
 
     for (auto& NullFunc : NullFuncs)
         if (NullFunc != 0)
@@ -185,17 +230,35 @@ void Main()
 
     for (auto& HookFunc : _HookFuncs)
         HookFunc();
+    DelMar::Log("%d hook groups installed", (int)_HookFuncs.size());
 
-    *(bool*)FindGIsClient() = false;
+    if (!FConfiguration::bStandalone)
+        *(bool*)FindGIsClient() = false;
     if (VersionInfo.EngineVersion > 4.20) // 3.6 and below have a crash on ALandscapeProxy
         *(bool*)FindGIsServer() = true;
 
     srand((uint32_t)time(0));
 
-    UWorld::GetWorld()->OwningGameInstance->LocalPlayers.Remove(0);
+    if (!FConfiguration::bStandalone)
+        UWorld::GetWorld()->OwningGameInstance->LocalPlayers.Remove(0);
     const wchar_t* terrainOpen = L"open Athena_Terrain";
 
-    if (wcsstr(FConfiguration::Playlist, L"/MoleGame/Playlists/Playlist_MoleGame"))
+    if (DelMar::IsEnabled())
+    {
+        DelMar::Log("DelMar bring-up: discovery -> core plugin activation -> %ls", DelMar::MapOpenCommand());
+        DelMar::RunOnGameThreadAndWait([] { DelMar::DiscoverGameFeatureApi(); }, 180000);
+
+        if (FConfiguration::bDelMarActivateGameFeatures)
+        {
+            DelMar::RunOnGameThreadAndWait([] { DelMar::ActivateCorePlugins(); }, 60000);
+            DelMar::WaitForCorePlugins(FConfiguration::DelMarCorePluginWaitMs);
+        }
+        else
+            DelMar::Log("bDelMarActivateGameFeatures is off - relying on the playlist's native activation");
+
+        terrainOpen = DelMar::MapOpenCommand();
+    }
+    else if (wcsstr(FConfiguration::Playlist, L"/MoleGame/Playlists/Playlist_MoleGame"))
     {
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Mole.WorstCasePlayerCount 1"), nullptr);
         terrainOpen = L"open Mole_UnderBase_Parent";
@@ -217,11 +280,33 @@ void Main()
             terrainOpen = L"open Apollo_Terrain";
     }
 
+    if (DelMar::IsEnabled())
+        DelMar::RunOnGameThreadAndWait([] { DelMar::ConfigurePhysics(); }, 30000);
+
+    DelMar::Log("console: %ls", terrainOpen);
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(terrainOpen), nullptr);
+    if (DelMar::IsEnabled())
+        DelMar::OnMapOpenIssued();
 
     auto EncryptionPatch = FindEncryptionPatch();
     if (EncryptionPatch)
-        Hooking::Patch<uint8_t>(EncryptionPatch, 0x74);
+    {
+        auto* EncBytes = (uint8_t*)EncryptionPatch;
+        if (EncBytes[0] == 0x0F && EncBytes[1] == 0x8F)
+        {
+            DWORD OldProt = 0;
+            if (VirtualProtect(EncBytes, 6, PAGE_EXECUTE_READWRITE, &OldProt))
+            {
+                memset(EncBytes, 0x90, 6);
+                VirtualProtect(EncBytes, 6, OldProt, &OldProt);
+                DelMar::Log("[net] encryption branch at %p neutralised (6-byte near jg -> nops)", EncBytes);
+            }
+        }
+        else
+        {
+            Hooking::Patch<uint8_t>(EncryptionPatch, 0x74);
+        }
+    }
     else
         printf("Matchmaking is NOT supported on this version, please make a github issue.\n");
 
@@ -229,6 +314,7 @@ void Main()
         HookFunc();
 
     Misc::bHookedAll = true;
+    DelMar::Log("all hooks installed - waiting for the map to load and ReadyToStartMatch to fire");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)

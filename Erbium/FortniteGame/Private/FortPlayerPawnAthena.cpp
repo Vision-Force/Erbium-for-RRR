@@ -69,7 +69,6 @@ void AFortPlayerPawnAthena::ServerHandlePickup_(UObject* Context, FFrame& Stack)
     Pickup->bPickedUp = true;
     Pickup->OnRep_bPickedUp();
 
-
     Pawn->IncomingPickups.Add(Pickup);*/
     auto SetPickupTarget = (void (*&)(AFortPickupAthena*, AFortPlayerPawnAthena*, float, FVector, bool))SetPickupTarget_;
 
@@ -139,7 +138,6 @@ void AFortPlayerPawnAthena::ServerHandlePickupInfo(UObject* Context, FFrame& Sta
     Pickup->bPickedUp = true;
     Pickup->OnRep_bPickedUp();
 
-
     Pawn->IncomingPickups.Add(Pickup);*/
 }
 
@@ -178,7 +176,6 @@ void AFortPlayerPawnAthena::ServerHandlePickupWithRequestedSwap(UObject* Context
 
     Pickup->bPickedUp = true;
     Pickup->OnRep_bPickedUp();
-
 
     Pawn->IncomingPickups.Add(Pickup);*/
 }
@@ -478,6 +475,14 @@ void AFortPlayerPawnAthena::ServerOnExitVehicle_(UObject* Context, FFrame& Stack
     UFortVehicleSeatComponent* SeatComponent = (UFortVehicleSeatComponent*)Vehicle->GetComponentByClass(UFortVehicleSeatComponent::StaticClass());
 
     auto PlayerController = (AFortPlayerControllerAthena*)Pawn->Controller;
+
+    if (!SeatComponent || !PlayerController || !PlayerController->WorldInventory)
+    {
+        if (VersionInfo.FortniteVersion >= 29)
+            return callOG(Pawn, Stack.GetCurrentNativeFunction(), ServerOnExitVehicle, VehicleExitData);
+        else
+            return callOG(Pawn, Stack.GetCurrentNativeFunction(), ServerOnExitVehicle, ExitForceBehavior, bDestroyVehicleWhenForced);
+    }
 
     auto SeatIdx = SeatComponent->FindSeatIndex(Pawn);
 

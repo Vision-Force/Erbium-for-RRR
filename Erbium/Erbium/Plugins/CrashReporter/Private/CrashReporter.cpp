@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "../Public/CrashReporter.h"
+#include "../../../../FortniteGame/Public/DelMar.h"
 #include <TlHelp32.h>
 #include <sstream>
 #include <winternl.h>
@@ -58,6 +59,9 @@ DWORD FormatNtStatus(NTSTATUS nsCode, TCHAR** ppszMessage)
 LONG WINAPI ErbiumUnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo)
 {
     if ((ExceptionInfo->ExceptionRecord->ExceptionCode & 0x80000000) == 0 || (ExceptionInfo->ExceptionRecord->ExceptionCode & 0x30000000) != 0)
+        return EXCEPTION_CONTINUE_SEARCH;
+
+    if (DelMar::InGuardedRegion())
         return EXCEPTION_CONTINUE_SEARCH;
 
     FreezeOtherThreads();

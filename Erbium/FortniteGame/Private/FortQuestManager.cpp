@@ -291,7 +291,7 @@ void ProgressQuest(UFortQuestManager* _this, AFortPlayerControllerAthena* Player
                                                           bAllObjectivesCompleted);
     }
 
-    if (PlayerController->HasXPComponent())
+    if (PlayerController && PlayerController->HasXPComponent() && PlayerController->XPComponent)
     {
         PlayerController->XPComponent->QuestObjectiveUpdated(PlayerController, QuestDefinition, BackendName, Count, AcheivedCount + Count == QuestObjective->RequiredCount, bAllObjectivesCompleted);
     }
@@ -309,7 +309,7 @@ void UFortQuestManager::SendStatEvent__Internal(AActor* PlayerController, long l
     static auto XPTable = FindObject<UDataTable>(L"/Game/Athena/Items/Quests/AthenaObjectiveStatXPTable.AthenaObjectiveStatXPTable");
     auto FortPC = (AFortPlayerControllerAthena*)PlayerController;
 
-    if (XPTable && FortPC->HasXPComponent())
+    if (XPTable && FortPC && FortPC->HasXPComponent() && FortPC->XPComponent)
     {
         for (const auto& [Key, Value] : XPTable->RowMap)
         {
@@ -544,6 +544,9 @@ void QueueStatEvent(UFortQuestManager* QuestManager, uint8_t InType, UObject* In
                     void* InObjectiveStat, FName InObjectiveBackendName, int InCount)
 {
     printf("[QuestManager] QueueStatEvent (Event: %d)\n", InType);
+
+    if (!QuestManager || !QuestManager->GetPlayerControllerBP())
+        return;
 
     auto GameMode = (AFortGameModeAthena*)UWorld::GetWorld()->AuthorityGameMode;
     auto GameState = (AFortGameStateAthena*)GameMode->GameState;

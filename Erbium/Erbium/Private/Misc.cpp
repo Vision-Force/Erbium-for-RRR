@@ -7,11 +7,12 @@
 #include "../../FortniteGame/Public/FortWeapon.h"
 #include "../Public/Configuration.h"
 #include "../Public/Finders.h"
+#include "../../FortniteGame/Public/DelMar.h"
 #include <algorithm>
 
 int Misc::GetNetMode()
 {
-    return 1;
+    return FConfiguration::bStandalone ? 0 : 1;
 }
 
 void* Misc::SendRequestNow(void* Arg1, void* MCPData, int)
@@ -24,6 +25,14 @@ void* Misc::SendRequestNow(void* Arg1, void* MCPData, int)
 
 float Misc::GetMaxTickRate(UEngine* Engine, float DeltaTime, bool bAllowFrameRateSmoothing)
 {
+    DelMar::PumpGameThread();
+
+    if (DelMar::IsEnabled())
+    {
+        DelMar::ReportFrameTime(DeltaTime);
+        return (float)FConfiguration::DelMarMaxTickRate;
+    }
+
     // improper, DS is supposed to do hitching differently
     return (float)FConfiguration::MaxTickRate;
     // return std::clamp(1.f / DeltaTime, 1.f, FConfiguration::MaxTickRate);
@@ -350,7 +359,7 @@ bool Listen()
     if (VersionInfo.FortniteVersion >= 20)
         NetDriver->NetServerMaxTickRate = 30;
 
-    NetDriver->NetDriverName = NetDriverName;
+    NetDriver->NetDriverName.ComparisonIndex = NetDriverName.ComparisonIndex;
     NetDriver->World = World;
 
     if (VersionInfo.EngineVersion >= 5.3 && FConfiguration::bEnableIris)
@@ -358,7 +367,7 @@ bool Listen()
         *(bool*)(__int64(&NetDriver->ReplicationDriver) + 0x11) = true;
     }
 
-    NetDriver->NetDriverName = NetDriverName;
+    NetDriver->NetDriverName.ComparisonIndex = NetDriverName.ComparisonIndex;
     NetDriver->World = World;
 
     auto InitListen = (bool (*)(UNetDriver*, UWorld*, FURL*, bool, FString&))FindInitListen();

@@ -21,6 +21,7 @@
 #include "../Public/FortSafeZoneIndicator.h"
 #include "../Public/LevelStreamingDynamic.h"
 #include "../Public/FortAthenaSpawningPolicyManager.h"
+#include "../Public/DelMar.h"
 #include <random>
 
 void ShowFoundation(const ABuildingFoundation* Foundation)
@@ -120,9 +121,12 @@ void StreamAdditionalPlaylistLevels(AFortGameStateAthena* _this)
 void SetupPlaylist(AFortGameMode* GameMode, AFortGameStateAthena* GameState)
 {
     auto Playlist = FindObject<UFortPlaylistAthena>(FConfiguration::Playlist);
+    DelMar::Log("SetupPlaylist: %ls -> %s", FConfiguration::Playlist, Playlist ? "found" : "NOT FOUND");
 
-    if (!Playlist)
+    if (!Playlist && !DelMar::IsEnabled())
         Playlist = FindObject<UFortPlaylistAthena>(L"/Game/Athena/Playlists/Playlist_DefaultSolo.Playlist_DefaultSolo");
+    if (!Playlist && DelMar::IsEnabled())
+        DelMar::Log("!! the DelMar playlist could not be found or loaded - is DelMarCore mounted? (see the plugin state dumps)");
 
     if (Playlist)
     {
@@ -182,7 +186,7 @@ void SetupPlaylist(AFortGameMode* GameMode, AFortGameStateAthena* GameState)
         if (GameState->HasCurrentPlaylistId())
             GameState->CurrentPlaylistId = Playlist->PlaylistId;
         if (GameMode->HasCurrentPlaylistName())
-            GameMode->CurrentPlaylistName = Playlist->PlaylistName;
+            GameMode->CurrentPlaylistName.ComparisonIndex = Playlist->PlaylistName.ComparisonIndex;
 
         if (GameMode->GameSession->HasMaxPlayers())
             GameMode->GameSession->MaxPlayers = Playlist->MaxPlayers;
@@ -199,6 +203,9 @@ void SetupPlaylist(AFortGameMode* GameMode, AFortGameStateAthena* GameState)
 
         if (Playlist)
             StreamAdditionalPlaylistLevels(GameState);
+
+        if (DelMar::IsEnabled())
+            DelMar::OnPlaylistApplied(GameMode, GameState, Playlist);
     }
     else
     {
@@ -298,66 +305,29 @@ void AFortGameMode::ReadyToStartMatch_(UObject* Context, FFrame& Stack, bool* Re
     }
     auto GameMode = Context->Cast<AFortGameMode>();
 
+    if (!GameMode)
+    {
+        static bool bWarnedNonFort = false;
+        if (!bWarnedNonFort)
+            DelMar::Log("ReadyToStartMatch on a non-FortGameMode mode (%s) - leaving it to the engine", DelMar::ClassChain(Context).c_str());
+        bWarnedNonFort = true;
+        *Ret = callOGWithRet(((AFortGameMode*)Context), Stack.GetCurrentNativeFunction(), ReadyToStartMatch);
+        return;
+    }
+
     auto GameState = GameMode->GameState;
 
-    static bool setup = false;
-    if (GameMode->HasWarmupRequiredPlayerCount() ? GameMode->WarmupRequiredPlayerCount != 1 : !setup)
+    static AFortGameMode* SetupFor = nullptr;
+    if (SetupFor != GameMode)
     {
-        setup = true;
+        SetupFor = GameMode;
+        DelMar::Log("ReadyToStartMatch: first call on %s - starting the listen server and applying the playlist", DelMar::ClassChain(GameMode).c_str());
 
         // if (!FindListenCall())
         {
-            auto World = UWorld::GetWorld();
-            auto Engine = UEngine::GetEngine();
-            auto NetDriverName = FName(L"GameNetDriver");
-
-            if (GameMode->HasbEnableReplicationGraph())
-                GameMode->bEnableReplicationGraph = true;
-
-            UNetDriver* NetDriver = nullptr;
-            if (VersionInfo.FortniteVersion >= 16.00)
-            {
-                void* WorldCtx = ((void* (*)(UEngine*, UWorld*))FindGetWorldContext())(Engine, World);
-                World->NetDriver = NetDriver = ((UNetDriver * (*)(UEngine*, void*, FName, int)) FindCreateNetDriverWorldContext())(Engine, WorldCtx, NetDriverName, 0);
-            }
-            else
-                World->NetDriver = NetDriver = ((UNetDriver * (*)(UEngine*, UWorld*, FName)) FindCreateNetDriver())(Engine, World, NetDriverName);
-            if (VersionInfo.FortniteVersion >= 20)
-                NetDriver->NetServerMaxTickRate = 30;
-
-            NetDriver->NetDriverName = NetDriverName;
-            NetDriver->World = World;
-
-            if (VersionInfo.EngineVersion >= 5.3 && FConfiguration::bEnableIris)
-            {
-                *(bool*)(__int64(&NetDriver->ReplicationDriver) + 0x11) = true;
-            }
-
-            NetDriver->NetDriverName = NetDriverName;
-            NetDriver->World = World;
-
-            for (int i = 0; i < World->LevelCollections.Num(); i++)
-            {
-                auto& LevelCollection = World->LevelCollections.Get(i, FLevelCollection::Size());
-
-                LevelCollection.NetDriver = NetDriver;
-            }
-
-            auto URL = (FURL*)malloc(FURL::Size());
-            memset((PBYTE)URL, 0, FURL::Size());
-            URL->Port = FConfiguration::Port;
-
-            auto InitListen = (bool (*)(UNetDriver*, UWorld*, FURL*, bool, FString&))FindInitListen();
-            auto SetWorld = (void (*)(UNetDriver*, UWorld*))FindSetWorld();
-
-            SetWorld(NetDriver, World);
-            FString Err;
-            if (InitListen(NetDriver, World, URL, false, Err))
-                SetWorld(NetDriver, World);
-            else
-                printf("Failed to listen!");
-
-            free(URL);
+            bool bListening = false;
+            DelMar::SetupListenServer(&bListening);
+            DelMar::OnListenStarted(bListening);
         }
 
         if (GameMode->HasWarmupRequiredPlayerCount())
@@ -800,7 +770,8 @@ void AFortGameMode::ReadyToStartMatch_(UObject* Context, FFrame& Stack, bool* Re
             }
         }
 
-        GameMode->DefaultPawnClass = FindObject<UClass>(L"/Game/Athena/PlayerPawn_Athena.PlayerPawn_Athena_C");
+        if (!DelMar::IsDelMarObject(GameMode))
+            GameMode->DefaultPawnClass = FindObject<UClass>(L"/Game/Athena/PlayerPawn_Athena.PlayerPawn_Athena_C");
 
         if (VersionInfo.EngineVersion == 4.16 && VersionInfo.FortniteVersion < 1.9)
         {
@@ -883,6 +854,8 @@ void AFortGameMode::ReadyToStartMatch_(UObject* Context, FFrame& Stack, bool* Re
                   VersionInfo.FortniteVersion, VersionInfo.EngineVersion);
         SetConsoleTitleA(GUI::windowTitle);
         GameMode->bWorldIsReady = true;
+        if (DelMar::IsEnabled())
+            DelMar::OnWorldReady(GameMode);
     }
 
     if (VersionInfo.EngineVersion >= 4.24 && GameMode->IsA<AFortGameModeAthena>())
@@ -963,7 +936,7 @@ void AFortGameMode::SpawnDefaultPawnFor(UObject* Context, FFrame& Stack, AActor*
 
     Pawn = (AFortPlayerPawnAthena*)UWorld::SpawnActor(GameMode->GetDefaultPawnClassForController(NewPlayer), StartSpot->GetTransform(), NewPlayer, 3);
 
-    while (!Pawn)
+    for (int Attempt = 0; !Pawn && Attempt < 8; Attempt++)
     {
         auto PlayerStart = GameMode->ChoosePlayerStart(NewPlayer);
         if (PlayerStart)
@@ -981,6 +954,8 @@ void AFortGameMode::SpawnDefaultPawnFor(UObject* Context, FFrame& Stack, AActor*
     }*/
 
     *Ret = Pawn;
+    if (DelMar::IsEnabled())
+        DelMar::OnPawnSpawned(NewPlayer, Pawn, StartSpot);
 
     auto Num = NewPlayer->WorldInventory ? NewPlayer->WorldInventory->Inventory.ReplicatedEntries.Num() : 0;
     if (Num == 0)
@@ -1272,6 +1247,8 @@ void AFortGameMode::HandleStartingNewPlayer_(UObject* Context, FFrame& Stack)
     auto GameMode = (AFortGameMode*)Context;
     auto GameState = (AFortGameStateAthena*)GameMode->GameState;
     AFortPlayerStateAthena* PlayerState = (AFortPlayerStateAthena*)NewPlayer->PlayerState;
+    if (DelMar::IsEnabled())
+        DelMar::OnNewPlayer(GameMode, NewPlayer);
 
     if (VersionInfo.FortniteVersion <= 2.5)
     {
@@ -1744,6 +1721,12 @@ void AFortGameMode::FinishWorldInitialization(AFortGameMode* _this, AActor* Worl
 
     printf("[GameMode] FinishWorldInitialization\n");
     FinishWorldInitializationOG(_this, WorldManager);
+
+    if (DelMar::IsDelMarObject(_this))
+    {
+        DelMar::Log("FinishWorldInitialization on %s - skipping the BR loot/vehicle setup", DelMar::ClassChain(_this).c_str());
+        return;
+    }
 
     auto AddToTierData = [&](const UDataTable* Table, TArray<FFortLootTierData*>& TempArr)
     {

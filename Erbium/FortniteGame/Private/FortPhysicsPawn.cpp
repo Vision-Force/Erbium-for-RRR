@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "../Public/DelMar.h"
 #include "../Public/FortPhysicsPawn.h"
 
 struct FReplicatedPhysicsPawnState
@@ -195,6 +196,13 @@ void OnRep_ReplicatedAttachedInfo(AFortOctopusTowhookAttachableProjectile* _this
 
 void AFortPhysicsPawn::Hook()
 {
+    if (DelMar::IsEnabled())
+    {
+        DelMar::Log("[hooks] DelMar: NOT hooking FortPhysicsPawn ServerMove / ServerUpdatePhysicsParams - "
+                    "that BR replication path would overwrite the race car's simulated transform every call");
+    }
+    else
+    {
     auto DefaultPhysPawn = GetDefaultObj();
     if (DefaultPhysPawn)
     {
@@ -219,6 +227,7 @@ void AFortPhysicsPawn::Hook()
 
         if (DefaultVehicle)
             Hooking::ExecHook(DefaultVehicle->GetFunction("ServerUpdatePhysicsParams"), ServerMove);
+    }
     }
 
     auto DefaultOctopusVehicle = AFortOctopusVehicle::GetDefaultObj();

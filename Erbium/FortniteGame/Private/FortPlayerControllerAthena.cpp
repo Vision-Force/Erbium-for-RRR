@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "../Public/FortPlayerControllerAthena.h"
+#include "../Public/DelMar.h"
 #include "../../Erbium/Public/Configuration.h"
 #include "../../Erbium/Public/Events.h"
 #include "../../Erbium/Public/GUI.h"
@@ -17,6 +18,9 @@
 
 void AFortPlayerControllerAthena::GetPlayerViewPoint(AFortPlayerControllerAthena* PlayerController, FVector& Loc, FRotator& Rot)
 {
+    if (DelMar::IsEnabled())
+        return GetPlayerViewPointOG(PlayerController, Loc, Rot);
+
     if (auto ViewTarget = PlayerController->GetViewTarget())
     {
         ViewTarget->GetActorEyesViewPoint(&Loc, &Rot);
@@ -42,6 +46,24 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(UObject* Context, 
 
     static auto FortPCServerAcknowledgePossession = (void (*)(AFortPlayerControllerAthena*, AActor*))DefaultObjImpl("FortPlayerController")->Vft[Stack.GetCurrentNativeFunction()->GetVTableIndex()];
     FortPCServerAcknowledgePossession(PlayerController, Pawn);
+
+    if (PlayerController->PlayerState)
+    {
+        auto AbilityInterface = PlayerController->PlayerState->GetInterface(IFortAbilitySystemInterface::StaticClass());
+        if (InitializePlayerGameplayAbilities_ && AbilityInterface)
+        {
+            auto InitializePlayerGameplayAbilities = (void (*&)(const IInterface*))InitializePlayerGameplayAbilities_;
+            InitializePlayerGameplayAbilities(AbilityInterface);
+        }
+        else if (PlayerController->PlayerState->AbilitySystemComponent)
+        {
+            for (auto& AbilitySet : AFortGameMode::AbilitySets)
+                PlayerController->PlayerState->AbilitySystemComponent->GiveAbilitySet(AbilitySet);
+        }
+    }
+
+    if (!PlayerController->WorldInventory)
+        return;
 
     auto Num = PlayerController->WorldInventory->Inventory.ReplicatedEntries.Num();
 
@@ -112,17 +134,6 @@ void AFortPlayerControllerAthena::ServerAcknowledgePossession(UObject* Context, 
             }
         }
     }
-
-    auto Interface = PlayerController->PlayerState->GetInterface(IFortAbilitySystemInterface::StaticClass());
-    if (InitializePlayerGameplayAbilities_ && Interface)
-    {
-        auto InitializePlayerGameplayAbilities = (void (*&)(const IInterface*))InitializePlayerGameplayAbilities_;
-
-        InitializePlayerGameplayAbilities(Interface);
-    }
-    else
-        for (auto& AbilitySet : AFortGameMode::AbilitySets)
-            PlayerController->PlayerState->AbilitySystemComponent->GiveAbilitySet(AbilitySet);
 
     if (Num == 0)
     {
@@ -254,7 +265,7 @@ void AFortPlayerControllerAthena::ServerAttemptAircraftJump_(UObject* Context, F
         else
             PlayerController = (AFortPlayerControllerAthena*)Context;
 
-        PlayerController->StateName = FName(L"Inactive");
+        PlayerController->StateName.ComparisonIndex = FName(L"Inactive").ComparisonIndex;
 
         if (PlayerController->Pawn)
             PlayerController->UnPossess(PlayerController->Pawn);
@@ -1406,6 +1417,9 @@ public:
 void AFortPlayerControllerAthena::InternalPickup(FFortItemEntry* PickupEntry)
 {
     if (!PickupEntry || !PickupEntry->ItemDefinition)
+        return;
+
+    if (!WorldInventory)
         return;
 
     auto MaxStack = (int32)PickupEntry->ItemDefinition->GetMaxStackSize();

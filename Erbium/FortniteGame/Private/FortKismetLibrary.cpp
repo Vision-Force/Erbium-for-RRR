@@ -89,6 +89,8 @@ void UFortKismetLibrary::GiveItemToInventoryOwner(UObject* Object, FFrame& Stack
     Stack.IncrementCode();
 
     auto PlayerController = (AFortPlayerControllerAthena*)InventoryOwner.ObjectPointer;
+    if (!PlayerController || !ItemDefinition || !PlayerController->WorldInventory)
+        return;
     auto ItemEntry = AFortInventory::MakeItemEntry(ItemDefinition, NumberToGive, ItemLevel);
     if (WeaponAmmoOverride != -1)
         ItemEntry->LoadedAmmo = WeaponAmmoOverride;
@@ -114,7 +116,7 @@ void UFortKismetLibrary::K2_RemoveItemFromPlayer(UObject* Context, FFrame& Stack
         Stack.StepCompiledIn(&bForceRemoval);
     Stack.IncrementCode();
 
-    if (!PlayerController || !ItemDefinition)
+    if (!PlayerController || !ItemDefinition || !PlayerController->WorldInventory)
     {
         *Ret = 0;
         return;

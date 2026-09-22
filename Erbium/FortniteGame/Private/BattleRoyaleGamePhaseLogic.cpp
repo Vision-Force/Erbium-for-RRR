@@ -35,6 +35,12 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::HandleMatchHasStarted(A
     HandleMatchHasStartedOG(GameMode);
     auto GamePhaseLogic = UFortGameStateComponent_BattleRoyaleGamePhaseLogic::Get(GameMode);
 
+    if (!GamePhaseLogic)
+    {
+        printf("[GamePhaseLogic] match started on a game state without a BR phase component - nothing to drive\n");
+        return;
+    }
+
     if (!bSkipWarmup)
     {
         auto Time = (float)UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());

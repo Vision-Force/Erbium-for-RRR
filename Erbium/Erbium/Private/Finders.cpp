@@ -247,6 +247,9 @@ uint64_t FindCreateNetDriverWorldContext()
     {
         bInitialized = true;
 
+        if (VersionInfo.FortniteVersion == 30.40)
+            return CreateNetDriver = ImageBase + 0x0338C93C;
+
         if (std::floor(VersionInfo.FortniteVersion) == 19)
             return CreateNetDriver = Memcury::Scanner::FindPattern("41 56 48 83 EC ? 48 63 81 ? ? ? ? 48 8D ? ? ? ? ? 48 8B B9 ? ? ? ? 4C 8B F2").ScanFor({ 0xC3 }, false).ScanFor({ 0x48 }).Get();
         if (VersionInfo.FortniteVersion >= 20)
@@ -1254,6 +1257,9 @@ uint64_t FindKickPlayer()
 
 uint64_t FindEncryptionPatch()
 {
+    if (VersionInfo.FortniteVersion == 30.40)
+        return ImageBase + 0x06CFEC4F;
+
     static uint64_t EncryptionPatch = 0;
 
     if (EncryptionPatch == 0)

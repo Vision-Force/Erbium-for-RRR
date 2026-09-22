@@ -485,7 +485,8 @@ void UNetDriver::TickFlush(UNetDriver* Driver, float DeltaSeconds)
     if (VersionInfo.FortniteVersion >= 25.20)
     {
         auto GamePhaseLogic = UFortGameStateComponent_BattleRoyaleGamePhaseLogic::Get(UWorld::GetWorld());
-        GamePhaseLogic->Tick();
+        if (GamePhaseLogic)
+            GamePhaseLogic->Tick();
     }
 
     if (Driver->ClientConnections.Num() > 0)
