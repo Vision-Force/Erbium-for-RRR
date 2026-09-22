@@ -76,7 +76,7 @@ does is made on top of that. The rest of the people whose commits are in this hi
 
 Support me
 <a href="https://ko-fi.com/shrezee">
-  <img src="https://img.shields.io/badge/Ko--fi-Support_the_archive-47d1ff?style=for-the-badge&logo=kofi&logoColor=white&labelColor=0d1a2e" alt="Support Me"/>
+  <img src="https://img.shields.io/badge/Ko--fi-Shrezee-47d1ff?style=for-the-badge&logo=kofi&logoColor=white&labelColor=0d1a2e" alt="Support Me"/>
 </a>
 
 <br/><br/>
