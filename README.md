@@ -1,11 +1,11 @@
 # Erbium for RRR (Rocket Racing Reborn) - Rocket Racing
 
-**This is a modified version of [Erbium](https://github.com/plooshi/Erbium). Erbium itself is by plooshi https://github.com/plooshi**
+**This is a modified version of Erbium forked from [Erbium](https://github.com/plooshi/Erbium). Erbium itself is by plooshi https://github.com/plooshi**
 **Modified by Shrezee https://github.com/shrezesUverse in 2026** for Rocket Racing Reborn project, which is a preservation project for
 Fortnite 30.40, its Rocket Racing (internally DelMar) mode
 
 Erbium is GPL-3.0. So is this as well. The licence text is
-unchanged in `LICENSE`, and this notice records the modification as GPL-3.0 section 5(a) requires
+unchanged in `LICENSE`, and this notice records the modification as GPL-3.0 section 5(a) requires. basically the only reason this repo exists is so that Vision Force can use this Erbium-RRR.dll
 
 <img src="https://raw.githubusercontent.com/Vision-Force/.github/main/profile/assets/divider-wide.svg" width="100%" alt="Vision Force Studio" />
 
