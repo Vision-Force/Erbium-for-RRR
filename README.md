@@ -1,7 +1,7 @@
 # Erbium for RRR (Rocket Racing Reborn) - Rocket Racing
 
-**This is a modified version of Erbium forked from [Erbium](https://github.com/plooshi/Erbium). Erbium itself is by [plooshi](https://github.com/plooshi**)
-**Modified by [Shrezee](https://github.com/shrezesUverse in 2026**) for Rocket Racing Reborn project, which is a preservation project for
+**This is a modified version of Erbium forked from [Erbium](https://github.com/plooshi/Erbium). Erbium itself is by [plooshi](https://github.com/plooshi)**
+**Modified by [Shrezee](https://github.com/shrezesUverse) in 2026** for Rocket Racing Reborn project, which is a preservation project for
 Fortnite 30.40, its Rocket Racing (internally DelMar) mode
 
 Erbium is GPL-3.0. So is this as well. The licence text is
