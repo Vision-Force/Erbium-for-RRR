@@ -1,5 +1,5 @@
-// fmodified work based on Erbium (https://github.com/plooshi/Erbium), via GPL-3.0. license.
-// DelMar.cpp, made by Vision Force, 2026. See README.md for the change list.
+// fmodified work based on Erbium (https://github.com/plooshi/Erbium), via GPL-3.0. license
+// DelMar.cpp, made by Shrezee https://github.com/shrezesUveerse, 2026. See README.md for the change list
 #include "pch.h"
 #include "../Public/DelMar.h"
 #include "../Public/FortGameMode.h"
