@@ -1044,7 +1044,7 @@ bool DelMar::WaitForCorePlugins(uint32 TimeoutMs)
 #pragma comment(lib, "user32.lib")
 namespace
 {
-    const char* const LobbyNeedle = "Load lobby done /Game/Maps/Frontend";
+    const char* const LobbyNeedle = "Load map complete /Game/Maps/Frontend";
 
     void EngineLogPath(char* Out, size_t N)
     {
