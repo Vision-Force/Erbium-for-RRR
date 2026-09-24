@@ -7,6 +7,7 @@
 #include "../Public/FortPlayerControllerAthena.h"
 #include "../../Engine/Public/NetDriver.h"
 #include "../../Erbium/Public/Configuration.h"
+#include "../../Erbium/Public/DelMarTrackTable.h"
 #include "../../Erbium/Public/Finders.h"
 #include <cctype>
 #include <cstdarg>
@@ -4866,8 +4867,103 @@ namespace
         return wcscmp(URL->Host.GetData(), FConfiguration::DelMarTravelSentinelHost) == 0;
     }
 
+    const wchar_t* ExistingPlaylistOption(const FURLRaw* URL)
+    {
+        if (!URL || !URL->Op.Data)
+            return nullptr;
+        for (int32_t i = 0; i < URL->Op.Num; ++i)
+        {
+            const wchar_t* Opt = URL->Op.Data[i].GetData();
+            if (Opt && _wcsnicmp(Opt, L"playlist=", 9) == 0 && Opt[9] != 0)
+                return Opt + 9;
+        }
+        return nullptr;
+    }
+
+    bool AppendOption(FURLRaw* URL, const wchar_t* Option)
+    {
+        const int32_t OldNum = URL->Op.Num;
+        FString* Fresh = FMemory::MallocForType<FString>(OldNum + 1);
+        if (!Fresh)
+            return false;
+        memset(Fresh, 0, sizeof(FString) * (OldNum + 1));
+        for (int32_t i = 0; i < OldNum; ++i)
+            memcpy(&Fresh[i], &URL->Op.Data[i], sizeof(FString));
+        Fresh[OldNum] = FString(Option);
+        URL->Op.Data = Fresh;
+        URL->Op.Num = OldNum + 1;
+        URL->Op.Max = OldNum + 1;
+        return true;
+    }
+
+    bool HasOptionPrefix(const FURLRaw* URL, const wchar_t* Prefix, size_t PrefixLen)
+    {
+        if (!URL || !URL->Op.Data)
+            return false;
+        for (int32_t i = 0; i < URL->Op.Num; ++i)
+        {
+            const wchar_t* Opt = URL->Op.Data[i].GetData();
+            if (Opt && _wcsnicmp(Opt, Prefix, PrefixLen) == 0)
+                return true;
+        }
+        return false;
+    }
+
+    void AppendVerseOptions(FURLRaw* URL)
+    {
+        if (!FConfiguration::bDelMarSendVerseURI)
+            return;
+
+        if (!HasOptionPrefix(URL, L"VerseURI=", 9))
+        {
+            wchar_t TrackFeature[256];
+            const wchar_t* Feature = FConfiguration::DelMarVerseTrackFeature;
+            if (const wchar_t* Chosen = ExistingPlaylistOption(URL))
+            {
+                if (const wchar_t* Plugin = DelMarTracks::PluginForMnemonic(Chosen))
+                {
+                    swprintf_s(TrackFeature, L"/Fortnite.com/GameFeatures/%ls", Plugin);
+                    Feature = TrackFeature;
+                    DelMar::Log("travel: %ls resolves to plugin %ls", Chosen, Plugin);
+                }
+                else
+                {
+                    DelMar::Log("travel: no plugin known for %ls, falling back to the configured track", Chosen);
+                }
+            }
+            wchar_t Verse[512];
+            swprintf_s(Verse, L"VerseURI=%ls+%ls", FConfiguration::DelMarVerseRootFeature, Feature);
+            if (AppendOption(URL, Verse))
+                DelMar::Log("travel: added ?%ls", Verse);
+            else
+                DelMar::Log("travel: could not allocate the option array for VerseURI");
+        }
+
+        if (!HasOptionPrefix(URL, L"SubGame=", 8))
+        {
+            wchar_t Sub[64];
+            swprintf_s(Sub, L"SubGame=%ls", FConfiguration::DelMarSubGame);
+            if (AppendOption(URL, Sub))
+                DelMar::Log("travel: added ?%ls", Sub);
+        }
+
+        if (!HasOptionPrefix(URL, L"game=", 5))
+        {
+            wchar_t Mode[256];
+            swprintf_s(Mode, L"game=%ls", FConfiguration::DelMarGameModeOption);
+            if (AppendOption(URL, Mode))
+                DelMar::Log("travel: added ?%ls", Mode);
+        }
+    }
+
     void AppendPlaylistOption(FURLRaw* URL)
     {
+        if (const wchar_t* Chosen = ExistingPlaylistOption(URL))
+        {
+            DelMar::Log("travel: keeping the track the session already chose (?playlist=%ls)", Chosen);
+            return;
+        }
+
         const wchar_t* Full = FConfiguration::Playlist;
         const wchar_t* Dot = wcsrchr(Full, L'.');
         const wchar_t* Name = Dot ? Dot + 1 : Full;
@@ -4906,6 +5002,7 @@ namespace
             URL->Map  = FString(FConfiguration::DelMarMap);
             URL->Valid = 1;
             AppendPlaylistOption(URL);
+            AppendVerseOptions(URL);
 
             //   UEngine::Browse Started Browse: "/DelMarCore/Playlists/DelMar_RootLevel"
         }

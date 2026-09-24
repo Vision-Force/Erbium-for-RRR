@@ -13,9 +13,10 @@ unchanged in `LICENSE`, and this notice records the modification as GPL-3.0 sect
 
 | File | Lines | What |
 |---|---|---|
-| [`FortniteGame/Private/DelMar.cpp`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/FortniteGame/Private/DelMar.cpp) | [**+4936**](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-5018c87a71a5501551ea8dd7cd072240aead5f60e6af77bc18b53055d8d37cd6) | new - the DelMar bring-up |
+| [`FortniteGame/Private/DelMar.cpp`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/FortniteGame/Private/DelMar.cpp) | [**+5033**](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-5018c87a71a5501551ea8dd7cd072240aead5f60e6af77bc18b53055d8d37cd6) | new - the DelMar bring-up |
 | [`FortniteGame/Public/DelMar.h`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/FortniteGame/Public/DelMar.h) | [**+63**](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-48892d86e422f9c0c347b3846ae6c898564fa3cb11158311cda7f9dbc9a3524b) | new - its header |
-| [`Erbium/Public/Configuration.h`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Erbium/Public/Configuration.h) | [**+99** &minus;7](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-919d3546d8dd14cf802367497b1f38fcfe89f6d7c917a330edca3d7799302774) | `bDelMar*` flag family and 30.40 pins |
+| [`Erbium/Public/Configuration.h`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Erbium/Public/Configuration.h) | [**+104** &minus;7](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-919d3546d8dd14cf802367497b1f38fcfe89f6d7c917a330edca3d7799302774) | `bDelMar*` flag family and 30.40 pins |
+| [`Erbium/Public/DelMarTrackTable.h`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Erbium/Public/DelMarTrackTable.h) | [**+131**](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-0d0cf6271c5a12fb604db33f5e09a05da867b7480514b0d30bd1629177462d28) | new - every track mnemonic to its game feature plugin |
 | [`Erbium/Private/dllmain.cpp`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Erbium/Private/dllmain.cpp) | [**+116** &minus;30](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-2930119ee154f4e73ea8296a66d79b1827f9c97c5f07fc79017cefaaa716ebc3) | 30.40 entry points |
 | [`Erbium/Private/Finders.cpp`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Erbium/Private/Finders.cpp) | [**+6**](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-3e02fbe77788047a9fe27158574515fc0bae532e476e671fd12a1dba1aabfc6c) | finder pins |
 | [`Erbium/Private/Misc.cpp`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Erbium/Private/Misc.cpp) | [**+12** &minus;3](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-6af38c4905c8e773a7f15ae72ee5c6dc0ae3ddedc5a38c61ab4692cd792b22c2) | finder pins |
@@ -30,7 +31,7 @@ unchanged in `LICENSE`, and this notice records the modification as GPL-3.0 sect
 | [`Engine/Private/NetDriver.cpp`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Engine/Private/NetDriver.cpp) | [**+2** &minus;1](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-05753c44bc050f67536775dd3d44631b0116410b45db4c4121fcecab4d3c563c) | 30.40 net driver pin |
 | [`Erbium/Plugins/CrashReporter/Private/CrashReporter.cpp`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Erbium/Plugins/CrashReporter/Private/CrashReporter.cpp) | [**+4**](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-9cb7b306bc4d0462bfbdd8606c53dafe3968c5890e81c8d2630714c854caec8f) | let the VEH cooperate with our SEH guards |
 | [`Erbium.vcxproj`](https://github.com/Vision-Force/Erbium-for-RRR/blob/main/Erbium/Erbium.vcxproj) | [**+4** &minus;1](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main#diff-1d21c7191340fd39be6dd32dbe1d3f51a0ccebaf40a08557e72a33cbe41543a3) | vc |
-| | **+5344** &minus;119 | across 17 files |
+| | **+5577** &minus;119 | across 18 files |
 
 [compare against upstream](https://github.com/Vision-Force/Erbium-for-RRR/compare/afed563...main)
 

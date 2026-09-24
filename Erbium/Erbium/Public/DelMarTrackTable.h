@@ -1,0 +1,131 @@
+#pragma once
+
+// Generated from backend/src/data/delmar-track-plugins.json. Do not edit manually
+
+namespace DelMarTracks
+{
+    struct FTrackPlugin
+    {
+        const wchar_t* Mnemonic;
+        const wchar_t* Plugin;
+    };
+
+    static inline const FTrackPlugin Table[] = {
+        { L"playlist_delmar_alpine", L"Alpine" },
+        { L"playlist_delmar_apollo2_speedrun", L"Apollo" },
+        { L"playlist_delmar_apollo_racing", L"DelMarApollo" },
+        { L"playlist_delmar_apollo_ranked", L"DelMarApollo" },
+        { L"playlist_delmar_aqueduct", L"DelMarAqueduct" },
+        { L"playlist_delmar_borealis", L"Borealis" },
+        { L"playlist_delmar_bronze01_racing", L"DelMarNUX_Bronze01" },
+        { L"playlist_delmar_bronze01_ranked", L"DelMarNUX_Bronze01" },
+        { L"playlist_delmar_bronze01_speedrun", L"Bronze01" },
+        { L"playlist_delmar_bronze01adv_racing", L"DelMarNUX_Bronze01" },
+        { L"playlist_delmar_bronze01adv_ranked", L"DelMarNUX_Bronze01" },
+        { L"playlist_delmar_bronze02_nux", L"DelMarNUX_Bronze02" },
+        { L"playlist_delmar_bronze02_racing", L"DelMarNUX_Bronze02" },
+        { L"playlist_delmar_bronze02_ranked", L"DelMarNUX_Bronze02" },
+        { L"playlist_delmar_bronze02adv_racing", L"DelMarNUX_Bronze02" },
+        { L"playlist_delmar_bronze02adv_ranked", L"DelMarNUX_Bronze02" },
+        { L"playlist_delmar_bronze03_nux", L"DelMarNUX_Bronze03" },
+        { L"playlist_delmar_bronze03_racing", L"DelMarNUX_Bronze03" },
+        { L"playlist_delmar_bronze03_ranked", L"DelMarNUX_Bronze03" },
+        { L"playlist_delmar_bronze03adv_racing", L"Bronze03_adv" },
+        { L"playlist_delmar_bronze03adv_ranked", L"Bronze03_adv" },
+        { L"playlist_delmar_bronze04_racing", L"DelMarNUX_Bronze04" },
+        { L"playlist_delmar_bronze04_ranked", L"DelMarNUX_Bronze04" },
+        { L"playlist_delmar_bronze04adv_racing", L"DelMarNUX_Bronze04" },
+        { L"playlist_delmar_bronze04adv_ranked", L"DelMarNUX_Bronze04" },
+        { L"playlist_delmar_bronze06_nux", L"DelMarNUX_Bronze06" },
+        { L"playlist_delmar_bronze06_racing", L"DelMarNUX_Bronze06" },
+        { L"playlist_delmar_bronze06_ranked", L"DelMarNUX_Bronze06" },
+        { L"playlist_delmar_bronze06_speedrun", L"Bronze06" },
+        { L"playlist_delmar_bronze06adv_racing", L"DelMarNUX_Bronze06" },
+        { L"playlist_delmar_bronze06adv_ranked", L"DelMarNUX_Bronze06" },
+        { L"playlist_delmar_bronze07", L"DelMarNUX_Bronze07" },
+        { L"playlist_delmar_bronze08", L"DelMarNUX_Bronze08" },
+        { L"playlist_delmar_bronze09drifting_nux", L"DelMarNUX_Bronze09" },
+        { L"playlist_delmar_bronze09drifting_racing", L"DelMarNUX_Bronze09" },
+        { L"playlist_delmar_bronze09drifting_ranked", L"DelMarNUX_Bronze09" },
+        { L"playlist_delmar_bronze09driftingadv_racing", L"Bronze09_Drifting_adv" },
+        { L"playlist_delmar_bronze09driftingadv_ranked", L"Bronze09_Drifting_adv" },
+        { L"playlist_delmar_bronze09flying_nux", L"DelMarNUX_Bronze09" },
+        { L"playlist_delmar_bronze09flying_racing", L"DelMarNUX_Bronze09" },
+        { L"playlist_delmar_bronze09flying_ranked", L"DelMarNUX_Bronze09" },
+        { L"playlist_delmar_bronze09flying_speedrun", L"Bronze09_Flying" },
+        { L"playlist_delmar_bronze09flyingadv_racing", L"DelMarNUX_Bronze09" },
+        { L"playlist_delmar_bronze09flyingadv_ranked", L"DelMarNUX_Bronze09" },
+        { L"playlist_delmar_bronze10_nux", L"DelMarNUX_Bronze10" },
+        { L"playlist_delmar_bronze10_racing", L"DelMarNUX_Bronze10" },
+        { L"playlist_delmar_bronze10_ranked", L"DelMarNUX_Bronze10" },
+        { L"playlist_delmar_bronze10_speedrun", L"Bronze10" },
+        { L"playlist_delmar_bronze10adv_racing", L"DelMarNUX_Bronze10" },
+        { L"playlist_delmar_bronze10adv_ranked", L"DelMarNUX_Bronze10" },
+        { L"playlist_delmar_cascade", L"DelMarCascade" },
+        { L"playlist_delmar_cave", L"DelMarCave" },
+        { L"playlist_delmar_coralcove", L"CoralCove" },
+        { L"playlist_delmar_cruise", L"DelMarCruise" },
+        { L"playlist_delmar_difficulttrack", L"DM_404_S2_B" },
+        { L"playlist_delmar_draino_racing", L"DelMarDraino" },
+        { L"playlist_delmar_draino_ranked", L"DelMarDraino" },
+        { L"playlist_delmar_driftmania_racing", L"DelMarDriftmania" },
+        { L"playlist_delmar_driftmania_ranked", L"DelMarDriftmania" },
+        { L"playlist_delmar_driftmania_speedrun", L"Driftmania" },
+        { L"playlist_delmar_goldrush", L"GoldRush" },
+        { L"playlist_delmar_hydra2_racing", L"DelMarHydra" },
+        { L"playlist_delmar_hydra2_ranked", L"DelMarHydra" },
+        { L"playlist_delmar_hydra_racing", L"DelMarHydra" },
+        { L"playlist_delmar_hydra_ranked", L"DelMarHydra" },
+        { L"playlist_delmar_iron", L"DelMarIron" },
+        { L"playlist_delmar_jumper_racing", L"DelMarJumperStrafe" },
+        { L"playlist_delmar_jumper_ranked", L"DelMarJumperStrafe" },
+        { L"playlist_delmar_kickflip_racing", L"DelMarKickFlip" },
+        { L"playlist_delmar_kickflip_ranked", L"DelMarKickFlip" },
+        { L"playlist_delmar_nuxjumper_nux", L"DelMarJumperStrafe" },
+        { L"playlist_delmar_nuxjumper_racing", L"DelMarJumperStrafe" },
+        { L"playlist_delmar_nuxjumper_ranked", L"DelMarJumperStrafe" },
+        { L"playlist_delmar_olympus_racing", L"DelMarOlympus" },
+        { L"playlist_delmar_olympus_ranked", L"DelMarOlympus" },
+        { L"playlist_delmar_olympus_speedrun", L"Olympus" },
+        { L"playlist_delmar_ouroboros_racing", L"DelMarOuroboros" },
+        { L"playlist_delmar_ouroboros_ranked", L"DelMarOuroboros" },
+        { L"playlist_delmar_ouroborosadv_racing", L"Ouroboros_adv" },
+        { L"playlist_delmar_ouroborosadv_ranked", L"Ouroboros_adv" },
+        { L"playlist_delmar_phoenix_racing", L"DelMarPhoenix" },
+        { L"playlist_delmar_phoenix_ranked", L"DelMarPhoenix" },
+        { L"playlist_delmar_pirateadventure", L"PirateAdventure" },
+        { L"playlist_delmar_poseidon_racing", L"DelMarPoseidon" },
+        { L"playlist_delmar_poseidon_ranked", L"DelMarPoseidon" },
+        { L"playlist_delmar_rally_racing", L"DelMarRally" },
+        { L"playlist_delmar_rally_ranked", L"DelMarRally" },
+        { L"playlist_delmar_rallyadv_racing", L"Rally_adv" },
+        { L"playlist_delmar_rallyadv_ranked", L"Rally_adv" },
+        { L"playlist_delmar_riviera_racing", L"DelMarRiviera" },
+        { L"playlist_delmar_riviera_ranked", L"DelMarRiviera" },
+        { L"playlist_delmar_riviera_speedrun", L"Riviera" },
+        { L"playlist_delmar_roundtwoeasy", L"DM_404_S2_A" },
+        { L"playlist_delmar_seamless_tutorial", L"DelMarSeamless_TutorialRun" },
+        { L"playlist_delmar_sidewinder_racing", L"DelMarSidewinder" },
+        { L"playlist_delmar_sidewinder_ranked", L"DelMarSidewinder" },
+        { L"playlist_delmar_sidewinder_speedrun", L"Sidewinder" },
+        { L"playlist_delmar_snap2_speedrun", L"Snap" },
+        { L"playlist_delmar_snap_racing", L"DelMarSnap" },
+        { L"playlist_delmar_snap_ranked", L"DelMarSnap" },
+        { L"playlist_delmar_sweetjumps_racing", L"DelMarSweetJumps" },
+        { L"playlist_delmar_sweetjumps_ranked", L"DelMarSweetJumps" },
+        { L"playlist_delmar_turbine_racing", L"DelMarTurbine" },
+        { L"playlist_delmar_turbine_ranked", L"DelMarTurbine" },
+        { L"playlist_delmar_tutorial", L"DelMarSeamless_TutorialRun" },
+        { L"playlist_delmar_twister", L"Twister" },
+    };
+
+    static inline const wchar_t* PluginForMnemonic(const wchar_t* Mnemonic)
+    {
+        if (!Mnemonic || !*Mnemonic)
+            return nullptr;
+        for (const auto& Row : Table)
+            if (_wcsicmp(Row.Mnemonic, Mnemonic) == 0)
+                return Row.Plugin;
+        return nullptr;
+    }
+}
